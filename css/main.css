@@ -1,0 +1,96 @@
+body {
+    max-width: 1440px;
+    width: 95%;
+    margin: auto;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+}
+
+#timer {
+    text-shadow: 1px 1px 1px #000000;
+    font-weight: normal;
+    color: #FF0000;
+    word-spacing: 2pt;
+    font-size: 100px;
+    text-align: center;
+    font-family: helvetica, sans-serif;
+}
+
+.inputMethods {
+    max-width: 768px;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.handInput, .speechInput{
+    display: inline-block;
+    height: 100%;
+}
+
+.handInput {
+    width: 83%;
+}
+
+.speechInput {
+    width: 15%;
+}
+
+#handCityInput {
+    padding: 10px 5%;
+    border: 1px solid #b7b7b7;
+    border-radius: 3px;
+    font: normal 20px/normal "Times New Roman", Times, serif;
+    color: #002d80;
+    background: #fcfcfc;
+    box-shadow: 2px 2px 2px 0 #00000033 inset;
+    text-shadow: 1px 1px 0 #ffffffa8 ;
+    -webkit-transition: all 200ms cubic-bezier(0.42, 0, 0.58, 1);
+    transition: all 200ms cubic-bezier(0.42, 0, 0.58, 1);
+    width: 90%;
+  }
+
+#speechButton {
+    cursor: pointer;
+    padding: 10px 5%;
+    border: 1px solid #018dc4;
+    border-radius: 3px;
+    font: normal 16px/normal "Times New Roman", Times, serif;
+    color: rgba(255,255,255,0.9);
+    text-overflow: clip;
+    background: url("../img/mic_icon.png"), #0199d9;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-origin: padding-box;
+    background-clip: border-box;
+    background-size: contain;
+    box-shadow: 2px 2px 2px 0 rgba(0,0,0,0.2) ;
+    text-shadow: -1px -1px 0 rgba(15,73,168,0.66) ;
+    -webkit-transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+    transition: all 300ms cubic-bezier(0.42, 0, 0.58, 1);
+    width: 90%;
+  }
+  
+#speechButton:active {
+    background: url("../img/mic_icon.png"), #52c4f2;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    background-origin: padding-box;
+    background-clip: border-box;
+    background-size: contain;
+  }
+
+.entryHistory {
+    width: 100%;
+    height: 60vh;
+    max-width: 768px;
+    background-color: #ade8ff;
+    border: 1px solid #b7b7b7;
+    border-radius: 3px;
+    overflow: auto;
+}
