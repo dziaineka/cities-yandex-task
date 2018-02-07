@@ -4,6 +4,10 @@ var seconds = timeByTurn;
 var mansTurn = true;
 var usedCities = [];
 var inputField = document.getElementById("handCityInput");
+var timerView = document.getElementById("timer");
+var timerExpiredEvent = new Event('timerExpired');
+
+document.addEventListener('timerExpired', stopGame);
 
 function stopGame() {
     inGame = false;
@@ -16,26 +20,17 @@ function stopGame() {
 
 function startGame() {
     inGame = true;
-    usedCities = [];
-    var timer = document.getElementById("timer");
-    myMap.geoObjects.removeAll();
 
-    function tick() {
-        timer.innerHTML = seconds;
+    var timer = setInterval(() => {
+        timerView.innerHTML = seconds;
 
         if (seconds == 0) {
-            stopGame();
-            return;
-        } else {
-            seconds--;
+            clearInterval(timer);
+            document.dispatchEvent(timerExpiredEvent);
         }
 
-        if (seconds >= 0) {
-            setTimeout(tick, 1000);
-        }
-    }
-
-    tick();
+        seconds--;
+    }, 1000);
 }
 
 function checkInput() {
@@ -46,12 +41,12 @@ function checkInput() {
         return false;
     }
 
-    if (addCityToMap(cityName)) {
+    if (cityData.includes(cityName)) {
         usedCities.push(cityName);
+        addCityToMap(cityName);
         return true;
-    } else {
-        return false;
     }
+
 }
 
 function humansTurn() {
@@ -59,24 +54,30 @@ function humansTurn() {
 }
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+    });
 }
 
-async function imitatePrinting(cityName) {        
-    for (let index = 0; index < cityName.length; index++) {
-        const element = cityName[index];
-        
-        document.getElementById("handCityInput").value += element; 
-        await sleep(Math.random() * 800); 
+function imitatePrinting(cityName) {
+    function addButton(res) {
+        document.getElementById("handCityInput").value += element;
+        resolve(res);
+    }
+
+    for (var index = 0; index < cityName.length; index++) {
+        var element = cityName[index];
+
+        sleep(Math.random() * 800).then(addButton(res));
     }
 }
 
-async function machinesTurn() {
+function machinesTurn() {
     inputField.setAttribute('readonly', '');
     var index = Math.ceil((Math.random() * cityData.length) + 1);
     var properCity = cityData[index];
 
-    await imitatePrinting(properCity);
+    imitatePrinting(properCity);
 
     if (!handleInput()) {
         machinesTurn();
@@ -99,34 +100,46 @@ function nextTurn() {
     }
 }
 
-async function alertIncorrectCity() {
+function highlightInputField(color) {
     var inputField = document.getElementById("handCityInput");
-    inputField.style.backgroundColor = "red";
-    
-    await sleep(1500);
+    inputField.style.backgroundColor = color;
 
-    clearInputField();
-    inputField.style.backgroundColor = "";
+    sleep(500).then(() => {
+        clearInputField();
+        inputField.style.backgroundColor = "";
+    });
 }
 
-async function handleInput() {
-    if (checkInput()) {
-        if (!inGame) {
-            startGame();
-        }
+function handleInput() {
+    if (!inGame) {
+        return false;
+    }
 
+    if (checkInput()) {
+        highlightInputField('green');
         nextTurn();
         return true;
     } else {
-        await alertIncorrectCity();
+        highlightInputField('red');
         return false;
     }
 }
 
-async function catchInput(event) {
+function resetGame() {
+    usedCities = [];
+    myMap.geoObjects.removeAll();
+    seconds = timeByTurn;
+}
+
+function catchInput(event) {
     if (mansTurn) {
         if (event.keyCode === 13) {
-            await handleInput();
+            if (!inGame) {
+                resetGame();
+                startGame();
+            }
+
+            handleInput();
         }
     }
 

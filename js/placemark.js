@@ -3,16 +3,16 @@ ymaps.ready(initMap);
 
 function initMap() {
     myMap = new ymaps.Map("map", {
-            center: [53.9, 27.56659],
-            zoom: 10
-        });
+        center: [53.9, 27.56659],
+        zoom: 10
+    });
 }
 
 function getCityColor() {
     if (mansTurn) {
-        return 'islands#greenDotIconWithCaption';
-    } else {
         return 'islands#redDotIconWithCaption';
+    } else {
+        return 'islands#greenDotIconWithCaption';
     }
 }
 
@@ -28,9 +28,8 @@ function swichToBigScale() {
 }
 
 function addCityToMap(cityName) {
-    var success = true;
-
-    // Поиск координат центра Нижнего Новгорода.
+    var colour = getCityColor();
+    // Поиск координат центра города.
     ymaps.geocode(cityName, {
         /**
          * Опции запроса
@@ -39,26 +38,23 @@ function addCityToMap(cityName) {
         // Если нужен только один результат, экономим трафик пользователей.
         results: 1
     }).then(function (res) {
-            // Выбираем первый результат геокодирования.
-            var firstGeoObject = res.geoObjects.get(0),
-                // Координаты геообъекта.
-                coords = firstGeoObject.geometry.getCoordinates(),
-                // Область видимости геообъекта.
-                bounds = firstGeoObject.properties.get('boundedBy');
+        // Выбираем первый результат геокодирования.
+        var firstGeoObject = res.geoObjects.get(0),
+            // Координаты геообъекта.
+            coords = firstGeoObject.geometry.getCoordinates(),
+            // Область видимости геообъекта.
+            bounds = firstGeoObject.properties.get('boundedBy');
 
-            firstGeoObject.options.set('preset', getCityColor());
-            // Получаем строку с адресом и выводим в иконке геообъекта.
-            firstGeoObject.properties.set('iconCaption', cityName);
+        firstGeoObject.options.set('preset', colour);
+        // Получаем строку с адресом и выводим в иконке геообъекта.
+        firstGeoObject.properties.set('iconCaption', cityName);
 
-            // Добавляем первый найденный геообъект на карту.
-            myMap.geoObjects.add(firstGeoObject);
-            // Масштабируем карту на область видимости геообъекта.
-            myMap.setBounds(bounds, {
-                // Проверяем наличие тайлов на данном масштабе.
-                checkZoomRange: true
-            });
-        },
-        () => {success = false; alert('not found');});
-
-    return success;
+        // Добавляем первый найденный геообъект на карту.
+        myMap.geoObjects.add(firstGeoObject);
+        // Масштабируем карту на область видимости геообъекта.
+        myMap.setBounds(bounds, {
+            // Проверяем наличие тайлов на данном масштабе.
+            checkZoomRange: true
+        });
+    });
 }
