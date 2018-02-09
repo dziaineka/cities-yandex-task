@@ -10,6 +10,7 @@ var timerExpiredEvent = new Event('timerExpired');
 var botEnteredEvent = new Event('botEntered');
 var botFoundCityEvent = new Event('botFoundCity');
 var neededLetter = '';
+var voiceUsed = false;
 
 document.addEventListener('timerExpired', stopGame);
 document.addEventListener('botEntered', handleInput);
@@ -84,6 +85,11 @@ function checkInput() {
 
 function humansTurn() {
     inputField.removeAttribute('readonly');
+
+    if (voiceUsed)
+    {
+        startVoiceRecognition();
+    }
 }
 
 function sleep(ms) {
@@ -152,7 +158,7 @@ function findCity() {
             stopThinkingVisualization(visID);
             document.dispatchEvent(botFoundCityEvent);
         }
-    }, 350);
+    }, 300);
 }
 
 function machinesTurn() {
@@ -223,11 +229,10 @@ inputField.addEventListener("keyup", function (event) {
     event.preventDefault();
     if (mansTurn) {
         if (event.keyCode === 13) {
+            voiceUsed = false;
             catchInput();
         }
     }
 });
 
-// игра по правилам
-// кнопку по высоте
 // голосовой ввод
