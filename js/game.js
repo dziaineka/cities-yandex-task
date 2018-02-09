@@ -1,20 +1,35 @@
-var timeByTurn = 10;
+var timeByTurn = 30;
 var inGame = false;
 var seconds = timeByTurn;
 var mansTurn = true;
 var usedCities = [];
+var botCity = '';
 var inputField = document.getElementById("handCityInput");
 var timerView = document.getElementById("timer");
 var timerExpiredEvent = new Event('timerExpired');
+var botEnteredEvent = new Event('botEntered');
+var botFoundCityEvent = new Event('botFoundCity');
+var neededLetter = '';
 
 document.addEventListener('timerExpired', stopGame);
+document.addEventListener('botEntered', handleInput);
+document.addEventListener('botFoundCity', imitatePrinting);
+
+function getEndString() {
+    if (mansTurn) {
+        return 'Победили машины!';
+    } else {
+        return 'Победило человечество!';
+    }
+}
 
 function stopGame() {
+    timerView.innerHTML = getEndString();
     inGame = false;
     mansTurn = true;
-    usedCities = [];
-    seconds = timeByTurn;
-    alert("Время вышло");
+    inputField.removeAttribute('readonly');
+    neededLetter = '';
+    clearInputField();
     swichToBigScale();
 }
 
@@ -33,17 +48,35 @@ function startGame() {
     }, 1000);
 }
 
+function saveLastButton(cityName) {
+    var lastButton = cityName[cityName.length - 1];
+
+    if (['ь', 'ъ', 'ы', 'й'].includes(lastButton))
+    {
+        // сохраним предпоследнюю букву, раз последняя не подходит
+        saveLastButton(cityName.substr(0, cityName.length - 1));
+    } else {
+        neededLetter = cityName[cityName.length - 1];
+    }
+}
+
 function checkInput() {
-    var cityName = document.getElementById("handCityInput").value;
+    var cityName = inputField.value;
     cityName = cityName.toLowerCase();
 
     if (usedCities.includes(cityName)) {
         return false;
     }
 
+    if (neededLetter != '' &&
+        neededLetter != cityName[0]) {
+        return false;
+    }
+
     if (cityData.includes(cityName)) {
         usedCities.push(cityName);
         addCityToMap(cityName);
+        saveLastButton(cityName);
         return true;
     }
 
@@ -59,39 +92,86 @@ function sleep(ms) {
     });
 }
 
-function imitatePrinting(cityName) {
-    function addButton(res) {
-        document.getElementById("handCityInput").value += element;
-        resolve(res);
+async function imitatePrinting() {
+    var cityName = botCity;
+
+    function addButton() {
+        inputField.value += element;
     }
 
-    for (var index = 0; index < cityName.length; index++) {
+    if (!inGame) {
+        return;
+    }
+
+    // печатаем без первой буквы, она уже введена
+    for (var index = 1; index < cityName.length; index++) {
         var element = cityName[index];
 
-        sleep(Math.random() * 800).then(addButton(res));
+        await sleep(Math.random() * 800);
+        addButton();
     }
+
+    await sleep(1000);
+
+    document.dispatchEvent(botEnteredEvent);
+}
+
+function startThinkingVisualization() {
+    var visualization = setInterval(() => {
+        if (inputField.value.length == 4) {
+            inputField.value = inputField.value[0];
+        } else {
+            inputField.value += '.';
+        }
+    }, 1000);
+
+    return visualization;
+}
+
+function stopThinkingVisualization(visualization) {
+    clearInterval(visualization);
+    inputField.value = inputField.value[0];
+}
+
+function findCity() {
+    var index;
+    var visID = startThinkingVisualization();
+
+    var finder = setInterval(() => {
+        index = Math.ceil((Math.random() * cityData.length) + 1);
+        var name = cityData[index];
+
+        if (!inGame) {
+            clearInterval(visID);
+            clearInterval(finder);
+        }
+
+        if (name[0] == neededLetter) {
+            clearInterval(finder);
+            botCity = name;
+            stopThinkingVisualization(visID);
+            document.dispatchEvent(botFoundCityEvent);
+        }
+    }, 350);
 }
 
 function machinesTurn() {
     inputField.setAttribute('readonly', '');
-    var index = Math.ceil((Math.random() * cityData.length) + 1);
-    var properCity = cityData[index];
 
-    imitatePrinting(properCity);
-
-    if (!handleInput()) {
-        machinesTurn();
-    }
+    findCity();
 }
 
 function clearInputField() {
-    document.getElementById("handCityInput").value = '';
+    inputField.value = neededLetter.toUpperCase();
 }
 
-function nextTurn() {
-    seconds = timeByTurn;
+function nextTurn(success) {
+    if (success) {
+        seconds = timeByTurn;
+        mansTurn = !mansTurn;
+    }
+
     clearInputField();
-    mansTurn = !mansTurn;
 
     if (mansTurn) {
         humansTurn();
@@ -101,7 +181,6 @@ function nextTurn() {
 }
 
 function highlightInputField(color) {
-    var inputField = document.getElementById("handCityInput");
     inputField.style.backgroundColor = color;
 
     sleep(500).then(() => {
@@ -112,16 +191,15 @@ function highlightInputField(color) {
 
 function handleInput() {
     if (!inGame) {
-        return false;
+        return;
     }
 
     if (checkInput()) {
         highlightInputField('green');
-        nextTurn();
-        return true;
+        nextTurn(true);
     } else {
         highlightInputField('red');
-        return false;
+        nextTurn(false);
     }
 }
 
@@ -129,24 +207,27 @@ function resetGame() {
     usedCities = [];
     myMap.geoObjects.removeAll();
     seconds = timeByTurn;
+    botCity = '';
 }
 
-function catchInput(event) {
-    if (mansTurn) {
-        if (event.keyCode === 13) {
-            if (!inGame) {
-                resetGame();
-                startGame();
-            }
-
-            handleInput();
-        }
+function catchInput() {
+    if (!inGame) {
+        resetGame();
+        startGame();
     }
 
+    handleInput();
 }
 
-document.getElementById("handCityInput")
-    .addEventListener("keyup", function (event) {
-        event.preventDefault();
-        catchInput(event);
-    });
+inputField.addEventListener("keyup", function (event) {
+    event.preventDefault();
+    if (mansTurn) {
+        if (event.keyCode === 13) {
+            catchInput();
+        }
+    }
+});
+
+// игра по правилам
+// кнопку по высоте
+// голосовой ввод
