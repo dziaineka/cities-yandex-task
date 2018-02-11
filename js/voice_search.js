@@ -1,6 +1,10 @@
 let speechBlinking;
 
 function startVoiceRecognition() {
+  if (!mansTurn) {
+    return;
+  }
+
   voiceUsed = true;
   recognition.stop();
   recognition.start();
