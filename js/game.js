@@ -18,222 +18,220 @@ document.addEventListener('botEntered', handleInput);
 document.addEventListener('botFoundCity', imitatePrinting);
 
 function getEndString() {
-    if (mansTurn) {
-        return 'Победили машины!';
-    } else {
-        return 'Победило человечество!';
-    }
+  if (mansTurn) {
+    return 'Победили машины!';
+  } else {
+    return 'Победило человечество!';
+  }
 }
 
 function stopGame() {
-    timerView.innerHTML = getEndString();
-    inGame = false;
-    mansTurn = true;
-    inputField.removeAttribute('readonly');
-    neededLetter = '';
-    clearInputField();
-    swichToBigScale();
+  timerView.innerHTML = getEndString();
+  inGame = false;
+  mansTurn = true;
+  inputField.removeAttribute('readonly');
+  neededLetter = '';
+  clearInputField();
+  swichToBigScale();
 }
 
 function startGame() {
-    inGame = true;
+  inGame = true;
 
-    var timer = setInterval(() => {
-        timerView.innerHTML = seconds;
+  var timer = setInterval(() => {
+    timerView.innerHTML = seconds;
 
-        if (seconds == 0) {
-            clearInterval(timer);
-            document.dispatchEvent(timerExpiredEvent);
-        }
+    if (seconds == 0) {
+      clearInterval(timer);
+      document.dispatchEvent(timerExpiredEvent);
+    }
 
-        seconds--;
-    }, 1000);
+    seconds--;
+  }, 1000);
 }
 
 function saveLastButton(cityName) {
-    var lastButton = cityName[cityName.length - 1];
+  var lastButton = cityName[cityName.length - 1];
 
-    if (['ь', 'ъ', 'ы', 'й'].includes(lastButton))
-    {
-        // сохраним предпоследнюю букву, раз последняя не подходит
-        saveLastButton(cityName.substr(0, cityName.length - 1));
-    } else {
-        neededLetter = cityName[cityName.length - 1];
-    }
+  if (['ь', 'ъ', 'ы', 'й'].includes(lastButton)) {
+    // сохраним предпоследнюю букву, раз последняя не подходит
+    saveLastButton(cityName.substr(0, cityName.length - 1));
+  } else {
+    neededLetter = cityName[cityName.length - 1];
+  }
 }
 
 function checkInput() {
-    var cityName = inputField.value;
-    cityName = cityName.toLowerCase();
+  var cityName = inputField.value;
+  cityName = cityName.toLowerCase();
 
-    if (usedCities.includes(cityName)) {
-        return false;
-    }
+  if (usedCities.includes(cityName)) {
+    return false;
+  }
 
-    if (neededLetter != '' &&
-        neededLetter != cityName[0]) {
-        return false;
-    }
+  if (neededLetter != '' &&
+    neededLetter != cityName[0]) {
+    return false;
+  }
 
-    if (cityData.includes(cityName)) {
-        usedCities.push(cityName);
-        addCityToMap(cityName);
-        saveLastButton(cityName);
-        return true;
-    }
+  if (cityData.includes(cityName)) {
+    usedCities.push(cityName);
+    addCityToMap(cityName);
+    saveLastButton(cityName);
+    return true;
+  }
 
 }
 
 function humansTurn() {
-    inputField.removeAttribute('readonly');
+  inputField.removeAttribute('readonly');
 
-    if (voiceUsed)
-    {
-        startVoiceRecognition();
-    }
+  if (voiceUsed) {
+    startVoiceRecognition();
+  }
 }
 
 function sleep(ms) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, ms);
-    });
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function imitatePrinting() {
-    var cityName = botCity;
+  var cityName = botCity;
 
-    function addButton() {
-        inputField.value += element;
-    }
+  function addButton() {
+    inputField.value += element;
+  }
 
-    if (!inGame) {
-        return;
-    }
+  if (!inGame) {
+    return;
+  }
 
-    // печатаем без первой буквы, она уже введена
-    for (var index = 1; index < cityName.length; index++) {
-        var element = cityName[index];
+  // печатаем без первой буквы, она уже введена
+  for (var index = 1; index < cityName.length; index++) {
+    var element = cityName[index];
 
-        await sleep(Math.random() * 800);
-        addButton();
-    }
+    await sleep(Math.random() * 800);
+    addButton();
+  }
 
-    await sleep(1000);
+  await sleep(1000);
 
-    document.dispatchEvent(botEnteredEvent);
+  document.dispatchEvent(botEnteredEvent);
 }
 
 function startThinkingVisualization() {
-    var visualization = setInterval(() => {
-        if (inputField.value.length == 4) {
-            inputField.value = inputField.value[0];
-        } else {
-            inputField.value += '.';
-        }
-    }, 1000);
+  var visualization = setInterval(() => {
+    if (inputField.value.length == 4) {
+      inputField.value = inputField.value[0];
+    } else {
+      inputField.value += '.';
+    }
+  }, 1000);
 
-    return visualization;
+  return visualization;
 }
 
 function stopThinkingVisualization(visualization) {
-    clearInterval(visualization);
-    inputField.value = inputField.value[0];
+  clearInterval(visualization);
+  inputField.value = inputField.value[0];
 }
 
 function findCity() {
-    var index;
-    var visID = startThinkingVisualization();
+  var index;
+  var visID = startThinkingVisualization();
 
-    var finder = setInterval(() => {
-        index = Math.ceil((Math.random() * cityData.length) + 1);
-        var name = cityData[index];
+  var finder = setInterval(() => {
+    index = Math.ceil((Math.random() * cityData.length) + 1);
+    var name = cityData[index];
 
-        if (!inGame) {
-            clearInterval(visID);
-            clearInterval(finder);
-        }
+    if (!inGame) {
+      clearInterval(visID);
+      clearInterval(finder);
+    }
 
-        if (name[0] == neededLetter) {
-            clearInterval(finder);
-            botCity = name;
-            stopThinkingVisualization(visID);
-            document.dispatchEvent(botFoundCityEvent);
-        }
-    }, 300);
+    if (name[0] == neededLetter) {
+      clearInterval(finder);
+      botCity = name;
+      stopThinkingVisualization(visID);
+      document.dispatchEvent(botFoundCityEvent);
+    }
+  }, 300);
 }
 
 function machinesTurn() {
-    inputField.setAttribute('readonly', '');
+  inputField.setAttribute('readonly', '');
 
-    findCity();
+  findCity();
 }
 
 function clearInputField() {
-    inputField.value = neededLetter.toUpperCase();
+  inputField.value = neededLetter.toUpperCase();
 }
 
 function nextTurn(success) {
-    if (success) {
-        seconds = timeByTurn;
-        mansTurn = !mansTurn;
-    }
+  if (success) {
+    seconds = timeByTurn;
+    mansTurn = !mansTurn;
+  }
 
-    clearInputField();
+  clearInputField();
 
-    if (mansTurn) {
-        humansTurn();
-    } else {
-        machinesTurn();
-    }
+  if (mansTurn) {
+    humansTurn();
+  } else {
+    machinesTurn();
+  }
 }
 
 function highlightInputField(color) {
-    inputField.style.backgroundColor = color;
+  inputField.style.backgroundColor = color;
 
-    sleep(500).then(() => {
-        clearInputField();
-        inputField.style.backgroundColor = "";
-    });
+  sleep(500).then(() => {
+    clearInputField();
+    inputField.style.backgroundColor = "";
+  });
 }
 
 function handleInput() {
-    if (!inGame) {
-        return;
-    }
+  if (!inGame) {
+    return;
+  }
 
-    if (checkInput()) {
-        highlightInputField('green');
-        nextTurn(true);
-    } else {
-        highlightInputField('red');
-        nextTurn(false);
-    }
+  if (checkInput()) {
+    highlightInputField('green');
+    nextTurn(true);
+  } else {
+    highlightInputField('red');
+    nextTurn(false);
+  }
 }
 
 function resetGame() {
-    usedCities = [];
-    myMap.geoObjects.removeAll();
-    seconds = timeByTurn;
-    botCity = '';
+  usedCities = [];
+  myMap.geoObjects.removeAll();
+  seconds = timeByTurn;
+  botCity = '';
 }
 
 function catchInput() {
-    if (!inGame) {
-        resetGame();
-        startGame();
-    }
+  if (!inGame) {
+    resetGame();
+    startGame();
+  }
 
-    handleInput();
+  handleInput();
 }
 
 inputField.addEventListener("keyup", function (event) {
-    event.preventDefault();
-    if (mansTurn) {
-        if (event.keyCode === 13) {
-            voiceUsed = false;
-            catchInput();
-        }
+  event.preventDefault();
+  if (mansTurn) {
+    if (event.keyCode === 13) {
+      voiceUsed = false;
+      catchInput();
     }
+  }
 });
 
 // голосовой ввод
