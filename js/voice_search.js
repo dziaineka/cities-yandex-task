@@ -1,8 +1,20 @@
+let speechBlinking;
+
 function startVoiceRecognition() {
-    recognition.start();
     voiceUsed = true;
-    // voiceInputButton.style.
+    recognition.stop();
+    recognition.start();
     console.log('Ready to receive a color command.');
+    speechBlinking = setInterval(blinkSpeechButton, 1000);
+}
+
+function blinkSpeechButton() {
+    var currentBgrnd = speechButton.style.backgroundColor;
+    speechButton.style.backgroundColor = 'red';
+
+    sleep(500).then(() => {
+        speechButton.style.backgroundColor = currentBgrnd;
+    });
 }
 
 if (navigator.userAgent.toLowerCase().indexOf('webkit') == -1) {
@@ -23,6 +35,7 @@ if (navigator.userAgent.toLowerCase().indexOf('webkit') == -1) {
     recognition.lang = 'ru';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+    recognition.continuous = true;
 
     console.log('Click then say a to change the background ' +
         'color of the app.');
@@ -46,18 +59,28 @@ if (navigator.userAgent.toLowerCase().indexOf('webkit') == -1) {
         console.log('Confidence: ' + event.results[0][0].confidence);
 
         inputField.value = voiceStr.trim();
-        sleep(1500).then(catchInput());
+        clearInterval(speechBlinking);
+        setTimeout(catchInput, 1500);
     };
 
     recognition.onspeechend = function () {
         recognition.stop();
+        console.log('Recognition stopped');
+        clearInterval(speechBlinking);
     };
 
     recognition.onnomatch = function (event) {
         console.log("I didn't recognise that color.");
+        clearInterval(speechBlinking);
     };
 
     recognition.onerror = function (event) {
         console.log('Error occurred in recognition: ' + event.error);
+        clearInterval(speechBlinking);
+    };
+
+    recognition.onend = function () {
+        console.log('Speech recognition service disconnected');
+        clearInterval(speechBlinking);
     };
 }
