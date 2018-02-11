@@ -20,7 +20,7 @@ function startVoiceRecognition() {
   voiceUsed = true;
   recognition.stop();
   recognition.start();
-  console.log('Ready to receive a color command.');
+  // console.log('Ready to receive a command.');
   speechBlinking = setInterval(blinkSpeechButton, 1000);
 }
 
@@ -39,8 +39,7 @@ recognition.lang = 'ru';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-console.log('Click then say a to change the background ' +
-  'color of the app.');
+// console.log('Click then say a city');
 
 voiceInputButton.onclick = startVoiceRecognition;
 
@@ -58,8 +57,8 @@ recognition.onresult = (event) => {
   const last = event.results.length - 1;
   const voiceStr = event.results[last][0].transcript;
 
-  console.log(`Result received: ${voiceStr}.`);
-  console.log(`Confidence: ${event.results[0][0].confidence}`);
+  // console.log(`Result received: ${voiceStr}.`);
+  // console.log(`Confidence: ${event.results[0][0].confidence}`);
 
   inputField.value = voiceStr.trim();
   clearInterval(speechBlinking);
@@ -68,21 +67,21 @@ recognition.onresult = (event) => {
 
 recognition.onspeechend = () => {
   recognition.stop();
-  console.log('Recognition stopped');
+  // console.log('Recognition stopped');
   clearInterval(speechBlinking);
 };
 
 recognition.onnomatch = () => {
-  console.log("I didn't recognise that color.");
+  // console.log("I didn't recognise that city.");
   clearInterval(speechBlinking);
 };
 
 recognition.onerror = (event) => {
-  console.log(`Error occurred in recognition: ${event.error}`);
+  // console.log(`Error occurred in recognition: ${event.error}`);
   clearInterval(speechBlinking);
 };
 
 recognition.onend = () => {
-  console.log('Speech recognition service disconnected');
+  // console.log('Speech recognition service disconnected');
   clearInterval(speechBlinking);
 };
