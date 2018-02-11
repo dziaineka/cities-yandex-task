@@ -18,7 +18,7 @@ function startVoiceRecognition() {
   }
 
   voiceUsed = true;
-  recognition.stop();
+  recognition.abort();
   recognition.start();
   // console.log('Ready to receive a command.');
   speechBlinking = setInterval(blinkSpeechButton, 1000);
