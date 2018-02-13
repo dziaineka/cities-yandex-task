@@ -1,6 +1,8 @@
 let speechBlinking;
 let SpeechRecognition;
 let SpeechRecognitionEvent;
+let recognition;
+
 const noWebkit = (navigator.userAgent.toLowerCase().indexOf('webkit') === -1) ||
   (navigator.userAgent.toLowerCase().indexOf('edge') !== -1);
 
@@ -42,7 +44,7 @@ if (noWebkit) {
 try {
   SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
   SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-  let recognition = new SpeechRecognition();
+  recognition = new SpeechRecognition();
 } catch (error) {
   //
 }
