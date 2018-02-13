@@ -229,7 +229,7 @@ inputField.addEventListener('keyup', (event) => {
   if (mansTurn) {
     if (event.keyCode === 13) {
       voiceUsed = false;
-      recognition.abort();
+      abortRecognition();
       catchInput();
     }
   }

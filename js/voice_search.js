@@ -1,7 +1,8 @@
 let speechBlinking;
 let SpeechRecognition;
 let SpeechRecognitionEvent;
-const noWebkit = navigator.userAgent.toLowerCase().indexOf('webkit') === -1;
+const noWebkit = (navigator.userAgent.toLowerCase().indexOf('webkit') === -1) ||
+  (navigator.userAgent.toLowerCase().indexOf('edge') !== -1);
 
 function blinkSpeechButton() {
   const currentBgrnd = speechButton.style.backgroundColor;
@@ -10,6 +11,14 @@ function blinkSpeechButton() {
   sleep(500).then(() => {
     speechButton.style.backgroundColor = currentBgrnd;
   });
+}
+
+function abortRecognition() {
+  try {
+    recognition.abort();    
+  } catch (error) {
+    //
+  }
 }
 
 function startVoiceRecognition() {
@@ -30,10 +39,13 @@ if (noWebkit) {
   document.getElementById('handCityInput').style.width = '100%';
 }
 
-SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-
-let recognition = new SpeechRecognition();
+try {
+  SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+  SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+  let recognition = new SpeechRecognition();
+} catch (error) {
+  //
+}
 
 recognition.lang = 'ru';
 recognition.interimResults = false;
