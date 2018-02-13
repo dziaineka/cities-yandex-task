@@ -21,6 +21,8 @@ function abortRecognition() {
   } catch (error) {
     //
   }
+
+  clearInterval(speechBlinking);
 }
 
 function startVoiceRecognition() {
