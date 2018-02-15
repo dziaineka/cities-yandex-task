@@ -3,9 +3,6 @@ let SpeechRecognition;
 let SpeechRecognitionEvent;
 let recognition;
 
-const noWebkit = (navigator.userAgent.toLowerCase().indexOf('webkit') === -1) ||
-  (navigator.userAgent.toLowerCase().indexOf('edge') !== -1);
-
 function blinkSpeechButton() {
   const currentBgrnd = speechButton.style.backgroundColor;
   speechButton.style.backgroundColor = 'red';
@@ -32,15 +29,16 @@ function startVoiceRecognition() {
 
   voiceUsed = true;
   recognition.abort();
-  recognition.start();
+
+  try {
+    recognition.start();
+  } catch (error) {
+    // если при старте произошла ошибка, то попробуем рестарт
+    recognition.abort();
+    recognition.start();
+  }
   // console.log('Ready to receive a command.');
   speechBlinking = setInterval(blinkSpeechButton, 1000);
-}
-
-if (noWebkit) {
-  document.getElementById('speechButton').style.display = 'none';
-  document.getElementsByClassName('speechInput')[0].style.display = 'none';
-  document.getElementById('handCityInput').style.width = '100%';
 }
 
 try {
@@ -48,7 +46,10 @@ try {
   SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
   recognition = new SpeechRecognition();
 } catch (error) {
-  //
+  // если при загрузке какая-нибудь ошибка, то отключаем кнопку
+  document.getElementById('speechButton').style.display = 'none';
+  document.getElementsByClassName('speechInput')[0].style.display = 'none';
+  document.getElementById('handCityInput').style.width = '100%';
 }
 
 recognition.lang = 'ru';
