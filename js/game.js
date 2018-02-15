@@ -157,7 +157,7 @@ function findCity() {
       stopThinkingVisualization(visID);
       document.dispatchEvent(botFoundCityEvent);
     }
-  }, 300);
+  }, 250);
 }
 
 function machinesTurn() {
