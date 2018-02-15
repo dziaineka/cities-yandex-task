@@ -12,6 +12,7 @@ const botEnteredEvent = new Event('botEntered');
 const botFoundCityEvent = new Event('botFoundCity');
 let neededLetter = '';
 let voiceUsed = false;
+const forbiddenSymbols = ['ь', 'ъ', 'ы', 'й', '(', ')', '!', '?', '.', ',', ';', ':'];
 
 function getEndString() {
   if (mansTurn) {
@@ -52,7 +53,7 @@ function startGame() {
 function saveLastButton(cityName) {
   const lastButton = cityName[cityName.length - 1];
 
-  if (['ь', 'ъ', 'ы', 'й'].includes(lastButton)) {
+  if (forbiddenSymbols.includes(lastButton)) {
     // сохраним предпоследнюю букву, раз последняя не подходит
     saveLastButton(cityName.substr(0, cityName.length - 1));
   } else {
