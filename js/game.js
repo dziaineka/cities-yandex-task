@@ -69,8 +69,8 @@ function checkInput() {
     return false;
   }
 
-  if (neededLetter != '' &&
-    neededLetter != cityName[0]) {
+  if (neededLetter !== '' &&
+    neededLetter !== cityName[0]) {
     return false;
   }
 
@@ -125,7 +125,8 @@ async function imitatePrinting() {
 function startThinkingVisualization() {
   const visualization = setInterval(() => {
     if (inputField.value.length === 4) {
-      inputField.value = inputField.value[0];
+      const [startLetter] = inputField.value;
+      inputField.value = startLetter;
     } else {
       inputField.value += '.';
     }
@@ -136,7 +137,9 @@ function startThinkingVisualization() {
 
 function stopThinkingVisualization(visualization) {
   clearInterval(visualization);
-  inputField.value = inputField.value[0];
+
+  const [startLetter] = inputField.value;
+  inputField.value = startLetter;
 }
 
 function findCity() {
@@ -152,7 +155,7 @@ function findCity() {
       clearInterval(finder);
     }
 
-    if (name[0] == neededLetter) {
+    if (name[0] === neededLetter) {
       clearInterval(finder);
       botCity = name;
       stopThinkingVisualization(visID);

@@ -14,7 +14,7 @@ function blinkSpeechButton() {
 
 function abortRecognition() {
   try {
-    recognition.abort();    
+    recognition.abort();
   } catch (error) {
     //
   }
@@ -45,6 +45,54 @@ try {
   SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
   SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
   recognition = new SpeechRecognition();
+
+  recognition.lang = 'ru';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  // console.log('Click then say a city');
+  recognition.onresult = (event) => {
+    // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+    // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+    // It has a getter so it can be accessed like an array
+    // The [last] returns the SpeechRecognitionResult at the last position.
+    // Each SpeechRecognitionResult object contains
+    // SpeechRecognitionAlternative objects that contain individual results.
+    // These also have getters so they can be accessed like arrays.
+    // The [0] returns the SpeechRecognitionAlternative at position 0.
+    // We then return the transcript property of the SpeechRecognitionAlternative object
+
+    const last = event.results.length - 1;
+    const voiceStr = event.results[last][0].transcript;
+
+    // console.log(`Result received: ${voiceStr}.`);
+    // console.log(`Confidence: ${event.results[0][0].confidence}`);
+
+    inputField.value = voiceStr.trim();
+    clearInterval(speechBlinking);
+    setTimeout(catchInput, 1500);
+  };
+
+  recognition.onspeechend = () => {
+    recognition.stop();
+    // console.log('Recognition stopped');
+    clearInterval(speechBlinking);
+  };
+
+  recognition.onnomatch = () => {
+    // console.log("I didn't recognise that city.");
+    clearInterval(speechBlinking);
+  };
+
+  recognition.onerror = (event) => {
+    // console.log(`Error occurred in recognition: ${event.error}`);
+    clearInterval(speechBlinking);
+  };
+
+  recognition.onend = () => {
+    // console.log('Speech recognition service disconnected');
+    clearInterval(speechBlinking);
+  };
 } catch (error) {
   // если при загрузке какая-нибудь ошибка, то отключаем кнопку
   document.getElementById('speechButton').style.display = 'none';
@@ -52,53 +100,4 @@ try {
   document.getElementById('handCityInput').style.width = '100%';
 }
 
-recognition.lang = 'ru';
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
-// console.log('Click then say a city');
-
 voiceInputButton.onclick = startVoiceRecognition;
-
-recognition.onresult = (event) => {
-  // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
-  // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
-  // It has a getter so it can be accessed like an array
-  // The [last] returns the SpeechRecognitionResult at the last position.
-  // Each SpeechRecognitionResult object contains
-  // SpeechRecognitionAlternative objects that contain individual results.
-  // These also have getters so they can be accessed like arrays.
-  // The [0] returns the SpeechRecognitionAlternative at position 0.
-  // We then return the transcript property of the SpeechRecognitionAlternative object
-
-  const last = event.results.length - 1;
-  const voiceStr = event.results[last][0].transcript;
-
-  // console.log(`Result received: ${voiceStr}.`);
-  // console.log(`Confidence: ${event.results[0][0].confidence}`);
-
-  inputField.value = voiceStr.trim();
-  clearInterval(speechBlinking);
-  setTimeout(catchInput, 1500);
-};
-
-recognition.onspeechend = () => {
-  recognition.stop();
-  // console.log('Recognition stopped');
-  clearInterval(speechBlinking);
-};
-
-recognition.onnomatch = () => {
-  // console.log("I didn't recognise that city.");
-  clearInterval(speechBlinking);
-};
-
-recognition.onerror = (event) => {
-  // console.log(`Error occurred in recognition: ${event.error}`);
-  clearInterval(speechBlinking);
-};
-
-recognition.onend = () => {
-  // console.log('Speech recognition service disconnected');
-  clearInterval(speechBlinking);
-};
